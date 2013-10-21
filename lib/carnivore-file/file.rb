@@ -4,40 +4,44 @@ module Carnivore
   class Source
     class File < Source
 
-      attr_reader :path
-      attr_reader :delimiter
+      attr_reader :path, :fetcher_name
 
-      def initialize(args={})
-        @leftover = ''
-        @path = args[:file]
-        @delimter = args.fetch(:delimiter, "\n")
-        case args[:foundation].to_sym
+      def setup(args={})
+        @path = ::File.expand_path(args[:file])
+        @fetcher_name = "log_fetcher_#{name}".to_sym
+        case (args[:foundation] || 'penguin').to_sym
         when :nio, :nio4r
-          require 'carnivore-file/nio.rb'
-          extend Carnivore::File::Nio
+          require 'carnivore-file/util/nio.rb'
+          callback_supervisor.supervise_as(fetcher_name, Carnivore::File::Util::Fetcher::Nio,
+            args.merge(:notify_actor => current_actor)
+          )
         else
-          require 'carnivore-file/penguin.rb'
-          extend Carnivore::File::Penguin
+          require 'carnivore-file/util/penguin.rb'
+          callback_supervisor.supervise_as(fetcher_name, Carnivore::File::Util::Fetcher::Penguin,
+            args.merge(:notify_actor => current_actor)
+          )
         end
-        super
+      end
+
+      def fetcher
+        Celluloid::Actor[fetcher_name]
       end
 
       def connect
-        unless(::File.exists?(path))
-          warn "Provided path does not exist: #{path}"
+        fetcher.async.start_fetcher
+      end
+
+      def receive(*args)
+        wait(:new_log_lines)
+        fetcher.return_lines.map do |l|
+          format_message(l)
         end
       end
 
       protected
 
-      def retrieve_lines(io)
-        result = nil
-        while(data = io.read(4096))
-          @leftover << data
-        end
-        result = @leftover.split(delimiter)
-        @leftover.replace @leftover.end_with?(delimiter) ? '' : result.pop
-        result
+      def format_message(m)
+        {:path => path, :content => m}
       end
 
     end
