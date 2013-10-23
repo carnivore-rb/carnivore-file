@@ -23,6 +23,14 @@ module Carnivore
           msgs
         end
 
+        def write_line(line)
+          if(io)
+            io.puts(line)
+          else
+            raise 'No IO detected! Failed to write.'
+          end
+        end
+
         def retrieve_lines
           if(io)
             while(data = io.read(4096))

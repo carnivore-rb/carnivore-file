@@ -38,6 +38,10 @@ module Carnivore
         end
       end
 
+      def transmit(payload, original_message)
+        fetcher.write_line(payload)
+      end
+
       protected
 
       def format_message(m)
