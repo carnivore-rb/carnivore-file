@@ -17,6 +17,20 @@ module Carnivore
           @messages = []
         end
 
+        def start_fetcher
+          defer do
+            loop do
+              build_socket
+              messages = nil
+              selector.select.each do |mon|
+                self.messages += retrieve_lines
+              end
+              notify_actor.signal(:new_logs_lines) unless self.messages.empty?
+            end
+          end
+        end
+
+
         def return_lines
           msgs = messages.dup
           messages.clear

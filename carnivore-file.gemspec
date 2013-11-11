@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.author = 'Chris Roberts'
   s.email = 'chrisroberts.code@gmail.com'
   s.homepage = 'https://github.com/carnivore-rb/carnivore-file'
-  s.description = 'Carnivore Github source'
+  s.description = 'Carnivore file source'
   s.require_path = 'lib'
   s.add_dependency 'carnivore', '>= 0.1.8'
   s.add_dependency 'sleepy_penguin'
