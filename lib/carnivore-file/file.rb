@@ -24,7 +24,7 @@ module Carnivore
       end
 
       def fetcher
-        Celluloid::Actor[fetcher_name]
+        callback_supervisor[fetcher_name]
       end
 
       def connect
