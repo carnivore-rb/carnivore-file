@@ -9,15 +9,16 @@ module Carnivore
       def setup(args={})
         @path = ::File.expand_path(args[:path])
         @fetcher_name = "log_fetcher_#{name}".to_sym
-        case (args[:foundation] || 'penguin').to_sym
+        unless(args[:foundation])
+          args[:foundation] = RUBY_ENGINE == 'jruby' ? :nio4r : :penguin
+        end
+        case args[:foundation].to_sym
         when :nio, :nio4r
-          require 'carnivore-files/util/nio.rb'
-          callback_supervisor.supervise_as(fetcher_name, Carnivore::File::Util::Fetcher::Nio,
+          callback_supervisor.supervise_as(fetcher_name, Carnivore::Files::Util::Fetcher::Nio,
             args.merge(:notify_actor => current_actor)
           )
         else
-          require 'carnivore-files/util/penguin.rb'
-          callback_supervisor.supervise_as(fetcher_name, Carnivore::File::Util::Fetcher::Penguin,
+          callback_supervisor.supervise_as(fetcher_name, Carnivore::Files::Util::Fetcher::Penguin,
             args.merge(:notify_actor => current_actor)
           )
         end
