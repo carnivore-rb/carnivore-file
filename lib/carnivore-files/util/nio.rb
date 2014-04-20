@@ -1,5 +1,5 @@
 require 'nio'
-require 'carnivore-file/util/fetcher'
+require 'carnivore-files/util/fetcher'
 
 module Carnivore
   module File

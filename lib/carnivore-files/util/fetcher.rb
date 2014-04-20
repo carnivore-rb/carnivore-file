@@ -11,7 +11,7 @@ module Carnivore
 
         def initialize(args={})
           @leftover = ''
-          @path = ::File.expand_path(args[:file])
+          @path = ::File.expand_path(args[:path])
           @delimiter = args.fetch(:delimiter, "\n")
           @notify_actor = args[:notify_actor]
           @messages = []
