@@ -1,4 +1,4 @@
-# Carnivore File
+# Carnivore Files
 
 Provides File `Carnivore::Source`
 
@@ -6,7 +6,7 @@ Provides File `Carnivore::Source`
 
 ```ruby
 require 'carnivore'
-require 'carnivore-file'
+require 'carnivore-files'
 
 Carnivore.configure do
   source = Carnivore::Source.build(
@@ -15,12 +15,14 @@ Carnivore.configure do
 end
 ```
 
-By default this uses `sleepy_penguin`. If you want to use
-`nio4r` instead:
+The `File` source is built on two "foundations", `sleepy_penguin`
+and `nio4r`. The optimal foundation will be selected based on
+the current Ruby in use (`nio4r` for JRuby, `sleepy_penguin` for
+everything else). If you want to force the foundation:
 
 ```ruby
 require 'carnivore'
-require 'carnivore-file'
+require 'carnivore-files'
 
 Carnivore.configure do
   source = Carnivore::Source.build(
@@ -31,7 +33,8 @@ Carnivore.configure do
   )
 end
 ```
+
 # Info
 * Carnivore: https://github.com/carnivore-rb/carnivore
-* Repository: https://github.com/carnivore-rb/carnivore-file
+* Repository: https://github.com/carnivore-rb/carnivore-files
 * IRC: Freenode @ #carnivore
