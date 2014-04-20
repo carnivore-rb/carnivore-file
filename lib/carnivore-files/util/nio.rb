@@ -1,8 +1,7 @@
 require 'nio'
-require 'carnivore-files/util/fetcher'
 
 module Carnivore
-  module File
+  module Files
     module Util
       class Fetcher
         class Nio < Fetcher
@@ -49,6 +48,7 @@ module Carnivore
               if(::File.exists?(path))
                 unless(io)
                   @io = ::File.open(path, 'r')
+                  @io.seek(0, ::IO::SEEK_END) # fast-forward to EOF
                 end
                 @monitor = selector.register(io, :r)
               else

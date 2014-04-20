@@ -1,8 +1,7 @@
 require 'sleepy_penguin/sp'
-require 'carnivore-files/util/fetcher'
 
 module Carnivore
-  module File
+  module Files
     module Util
       class Fetcher
         class Penguin < Fetcher
@@ -41,6 +40,7 @@ module Carnivore
               if(::File.exists?(path))
                 notify_descriptors[:file_watch] = notify.add_watch(path, :ALL_EVENTS)
                 @io = ::File.open(path, 'r')
+                @io.seek(0, ::IO::SEEK_END) # fast-forward to EOF
               else
                 wait_for_file
                 build_io
