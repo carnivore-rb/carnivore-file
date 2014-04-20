@@ -1,7 +1,10 @@
 module Carnivore
-  module File
+  module Files
     module Util
       class Fetcher
+
+        autoload :Nio, 'carnivore-files/util/nio'
+        autoload :Penguin, 'carnivore-files/util/penguin'
 
         include Celluloid
         include Carnivore::Utils::Logging
