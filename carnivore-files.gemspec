@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.email = 'code@chrisroberts.org'
   s.homepage = 'https://github.com/carnivore-rb/carnivore-files'
   s.description = 'Carnivore file source'
+  s.license = 'Apache 2.0'
   s.require_path = 'lib'
   s.add_dependency 'carnivore', '>= 0.1.8'
 #  s.add_dependency 'nio4r'          # suggested depends since we
