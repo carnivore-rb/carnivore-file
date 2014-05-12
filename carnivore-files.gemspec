@@ -11,8 +11,8 @@ Gem::Specification.new do |s|
   s.license = 'Apache 2.0'
   s.require_path = 'lib'
   s.add_dependency 'carnivore', '>= 0.1.8'
-#  s.add_dependency 'nio4r'          # suggested depends since we
   #  support both but don't want to install both
-#  s.add_dependency 'sleepy_penguin'
+  #  s.add_dependency 'nio4r'
+  #  s.add_dependency 'sleepy_penguin'
   s.files = Dir['**/*']
 end
