@@ -1,6 +1,8 @@
 module Carnivore
   module Files
+    # Helper utilities
     module Util
+      # Fetch lines from file
       class Fetcher
 
         autoload :Nio, 'carnivore-files/util/nio'
@@ -9,9 +11,24 @@ module Carnivore
         include Celluloid
         include Carnivore::Utils::Logging
 
-        attr_reader :path, :delimiter, :notify_actor
-        attr_accessor :messages, :io
+        # @return [String] path to file
+        attr_reader :path
+        # @return [String] string to split messages on
+        attr_reader :delimiter
+        # @return [Celluloid::Actor] actor to notify on new messages
+        attr_reader :notify_actor
 
+        # @return [Array] messages
+        attr_accessor :messages
+        # @return [IO] underlying IO instance
+        attr_accessor :io
+
+        # Create new instance
+        #
+        # @param args [Hash] initialization args
+        # @option args [String] :path path to file
+        # @option args [String] :delimiter string delimiter to break messages
+        # @option args [Celluloid::Actor] :notify_actor actor to be notified on new messages
         def initialize(args={})
           @leftover = ''
           @path = ::File.expand_path(args[:path])
@@ -20,6 +37,7 @@ module Carnivore
           @messages = []
         end
 
+        # Start the line fetcher
         def start_fetcher
           defer do
             loop do
@@ -33,13 +51,17 @@ module Carnivore
           end
         end
 
-
+        # @return [Array<String>] current lines
         def return_lines
           msgs = messages.dup
           messages.clear
           msgs
         end
 
+        # Write line to IO
+        #
+        # @param line [String]
+        # @return [Integer] bytes written
         def write_line(line)
           if(io)
             io.puts(line)
@@ -48,6 +70,7 @@ module Carnivore
           end
         end
 
+        # Retreive lines from file
         def retrieve_lines
           if(io)
             while(data = io.read(4096))

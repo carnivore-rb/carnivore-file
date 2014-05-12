@@ -4,10 +4,18 @@ module Carnivore
   module Files
     module Util
       class Fetcher
+
+        # NIO based fetcher
         class Nio < Fetcher
 
-          attr_accessor :monitor, :selector
+          # @return [NIO::Monitor]
+          attr_accessor :monitor
+          # @return [NIO::Selector]
+          attr_accessor :selector
 
+          # Create new instance
+          #
+          # @param args [Hash] initialization arguments (unused)
           def initialize(args={})
             super
             @selector = NIO::Selector.new
@@ -16,6 +24,7 @@ module Carnivore
             end
           end
 
+          # Start the fetcher
           def start_fetcher
             defer do
               loop do
@@ -31,6 +40,7 @@ module Carnivore
 
           private
 
+          # Check for file and destroy monitor if file has changed
           def check_file
             if(io)
               begin
@@ -43,6 +53,9 @@ module Carnivore
             end
           end
 
+          # Build the IO instance if found
+          #
+          # @return [TrueClass]
           def build_io
             unless(monitor)
               if(::File.exists?(path))
@@ -59,6 +72,9 @@ module Carnivore
             true
           end
 
+          # Destroy the IO instance and monitor
+          #
+          # @return [TrueClass]
           def destroy_io
             if(monitor)
               selector.deregister(monitor)
@@ -71,6 +87,9 @@ module Carnivore
             true
           end
 
+          # Wait helper for file to appear (5 sleep second intervals)
+          #
+          # @return [TrueClass]
           def wait_for_file
             warn "Waiting for file to appear (#{path})"
             until(::File.exists?(path))

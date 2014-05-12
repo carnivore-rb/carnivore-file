@@ -4,16 +4,25 @@ module Carnivore
   module Files
     module Util
       class Fetcher
+
+
+        # NIO based fetcher
         class Penguin < Fetcher
+          # @return [SP::Inotify]
+          attr_accessor :notify
+          # @return [Hash] registered file descriptors
+          attr_accessor :notify_descriptors
 
-          attr_accessor :notify, :notify_descriptors
-
+          # Create new instance
+          #
+          # @param args [Hash] initialization arguments (unused)
           def initialize(args={})
             super
             @notify = SP::Inotify.new
             @notify_descriptors = {}
           end
 
+          # Start the fetcher
           def start_fetcher
             defer do
               loop do
@@ -35,6 +44,9 @@ module Carnivore
 
           private
 
+          # Build the IO and monitor
+          #
+          # @return [TrueClass]
           def build_io
             unless(io)
               if(::File.exists?(path))
@@ -49,6 +61,9 @@ module Carnivore
             true
           end
 
+          # Destroy the IO and monitor
+          #
+          # @return [TrueClass]
           def destroy_io
             if(io)
               notify.rm_watch(notify_descriptors.delete(:file_watch))
@@ -58,6 +73,10 @@ module Carnivore
             true
           end
 
+
+          # Wait helper for file to appear (waits for expected notification)
+          #
+          # @return [TrueClass]
           def wait_for_file
             until(::File.exists?(path))
               notified = false
