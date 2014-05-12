@@ -34,6 +34,12 @@ Carnivore.configure do
 end
 ```
 
+## Important note
+
+The underlying foundations are not installed by this gem. Be sure
+include the dependency within your application dependencies (nio4r
+or sleepy_penguin).
+
 # Info
 * Carnivore: https://github.com/carnivore-rb/carnivore
 * Repository: https://github.com/carnivore-rb/carnivore-files
