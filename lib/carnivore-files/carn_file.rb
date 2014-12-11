@@ -3,7 +3,7 @@ require 'carnivore'
 module Carnivore
   class Source
     # Carnivore source for consumption from files
-    class File < Source
+    class CarnFile < Source
 
       # @return [String] path to file
       attr_reader :path

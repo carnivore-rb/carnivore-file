@@ -11,4 +11,4 @@ module Carnivore
   end
 end
 
-Carnivore::Source.provide(:file, 'carnivore-files/file')
+Carnivore::Source.provide(:carn_file, 'carnivore-files/carn_file')
