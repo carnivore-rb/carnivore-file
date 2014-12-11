@@ -10,7 +10,7 @@ require 'carnivore-files'
 
 Carnivore.configure do
   source = Carnivore::Source.build(
-    :type => :file, :args => {:path => '/var/log/app.log'}
+    :type => :carn_file, :args => {:path => '/var/log/app.log'}
   )
 end
 ```
@@ -26,7 +26,7 @@ require 'carnivore-files'
 
 Carnivore.configure do
   source = Carnivore::Source.build(
-    :type => :file, :args => {
+    :type => :carn_file, :args => {
       :path => '/var/log/app.log',
       :foundation => :nio
     }
