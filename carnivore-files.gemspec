@@ -12,7 +12,8 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.add_dependency 'carnivore', '>= 0.1.8'
   #  support both but don't want to install both
+  #  update to be setup like carnivore-rabbitmq
   #  s.add_dependency 'nio4r'
-  #  s.add_dependency 'sleepy_penguin'
-  s.files = Dir['**/*']
+  s.add_dependency 'sleepy_penguin'
+  s.files = Dir['{lib}/**/**/*'] + %w(carnivore-files.gemspec README.md CHANGELOG.md)
 end
