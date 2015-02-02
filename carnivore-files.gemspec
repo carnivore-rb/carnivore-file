@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__)) + '/lib/'
 require 'carnivore-files/version'
-Gem::Specification.new do |s|
+spec = Gem::Specification.new do |s|
   s.name = 'carnivore-files'
   s.version = Carnivore::Files::VERSION.version
   s.summary = 'Message processing helper'
@@ -12,5 +12,6 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.add_dependency 'carnivore', '>= 0.1.8'
   s.add_dependency 'sleepy_penguin'
+  s.add_dependency 'nio4r'
   s.files = Dir['{lib}/**/**/*'] + %w(carnivore-files.gemspec README.md CHANGELOG.md)
 end
