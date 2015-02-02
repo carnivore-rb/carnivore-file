@@ -29,7 +29,7 @@ module Carnivore
             loop do
               build_io
               messages = nil
-              selector.select.each do |mon|
+              Celluloid::Future.new{ selector.select }.value.each do |mon|
                 retrieve_lines.each do |l|
                   self.messages << l
                 end
@@ -45,6 +45,7 @@ module Carnivore
               begin
                 unless(io.stat.ino == ::File.stat(path).ino)
                   destroy_io
+                  @waited = true
                 end
               rescue Errno::ENOENT
                 destroy_io
@@ -57,7 +58,7 @@ module Carnivore
           # @return [TrueClass]
           def build_io
             result = super
-            if(result)
+            if(result && @monitor.nil?)
               @monitor = selector.register(io, :r)
             end
             result
@@ -84,6 +85,7 @@ module Carnivore
           def wait_for_file
             warn "Waiting for file to appear (#{path})"
             until(::File.exists?(path))
+              @waited = true
               sleep(5)
             end
             info "File has appeared (#{path})!"
