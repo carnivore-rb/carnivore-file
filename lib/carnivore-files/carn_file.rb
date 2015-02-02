@@ -8,7 +8,10 @@ module Carnivore
       # @return [String] path to file
       attr_reader :path
       # @return [Symbol] registry name of fetcher
-      attr_reader :fetcher_name
+      attr_reader :fetcher
+
+      trap_exit :fetcher_failure
+      finalizer :fetcher_destroyer
 
       # Setup source
       #
@@ -16,40 +19,46 @@ module Carnivore
       # @option args [String] :path path to file
       # @option args [Symbol] :foundation underlying file interaction library
       # @option args [Celluloid::Actor] :notify_actor actor to notify on line receive
-      def setup(args={})
+      def setup(*_)
         @path = ::File.expand_path(args[:path])
-        @fetcher_name = "log_fetcher_#{name}".to_sym
         unless(args[:foundation])
-          args[:foundation] = RUBY_ENGINE == 'jruby' ? :nio4r : :penguin
+          args[:foundation] = RUBY_PLATFORM == 'java' ? :nio4r : :penguin
         end
-        case args[:foundation].to_sym
-        when :nio, :nio4r
-          callback_supervisor.supervise_as(fetcher_name, Carnivore::Files::Util::Fetcher::Nio,
-            args.merge(:notify_actor => current_actor)
-          )
-        else
-          callback_supervisor.supervise_as(fetcher_name, Carnivore::Files::Util::Fetcher::Penguin,
-            args.merge(:notify_actor => current_actor)
-          )
-        end
-      end
-
-      # @return [Carnivore::Files::Util::Fetcher] line fetcher
-      def fetcher
-        callback_supervisor[fetcher_name]
       end
 
       # Start the line fetcher
       def connect
+        @fetcher_name = "log_fetcher_#{name}".to_sym
+        case args[:foundation].to_sym
+        when :nio, :nio4r
+          @fetcher = Carnivore::Files::Util::Fetcher::Nio.new(args)
+        else
+          @fetcher = Carnivore::Files::Util::Fetcher::Penguin.new(args)
+        end
+        self.link fetcher
         fetcher.async.start_fetcher
+      end
+
+      # Restart file collector if unexpectedly failed
+      #
+      # @param object [Actor] crashed actor
+      # @param reason [Exception, NilClass]
+      def fetcher_failure(object, reason)
+        if(reason && object == fetcher)
+          error "File message collector unexpectedly failed: #{reason} (restarting)"
+          connect
+        end
+      end
+
+      def fetcher_destroyer
+        if(fetcher && fetcher.alive?)
+          fetcher.terminate
+        end
       end
 
       # @return [Array<Hash>] return messages
       def receive(*args)
-        wait(:new_log_lines)
-        fetcher.return_lines.map do |l|
-          format_message(l)
-        end
+        format_message(Celluloid::Future.new{ fetcher.messages.pop }.value)
       end
 
       # Send payload
