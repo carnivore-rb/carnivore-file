@@ -5,7 +5,6 @@ describe 'Carnivore::Source::File' do
 
   before do
     @file_path = '/tmp/carnivore-file-test-1'
-    @file_roll = '/tmp/carnivore-file-test-2'
     MessageStore.init
     Carnivore::Source.build(
       :type => :carn_file,
@@ -23,9 +22,6 @@ describe 'Carnivore::Source::File' do
   after do
     if(File.exists?(@file_path))
       File.delete(@file_path)
-    end
-    if(File.exists?(@file_roll))
-      File.delete(@file_roll)
     end
     @runner.terminate
     Carnivore::Source.clear!
