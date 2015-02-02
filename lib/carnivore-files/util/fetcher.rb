@@ -1,3 +1,5 @@
+require 'carnivore-files'
+
 module Carnivore
   module Files
     # Helper utilities
@@ -15,10 +17,8 @@ module Carnivore
         attr_reader :path
         # @return [String] string to split messages on
         attr_reader :delimiter
-        # @return [Celluloid::Actor] actor to notify on new messages
-        attr_reader :notify_actor
 
-        # @return [Array] messages
+        # @return [Queue] messages
         attr_accessor :messages
         # @return [IO] underlying IO instance
         attr_accessor :io
@@ -33,29 +33,12 @@ module Carnivore
           @leftover = ''
           @path = ::File.expand_path(args[:path])
           @delimiter = args.fetch(:delimiter, "\n")
-          @notify_actor = args[:notify_actor]
-          @messages = []
+          @messages = Queue.new
         end
 
         # Start the line fetcher
         def start_fetcher
-          defer do
-            loop do
-              build_socket
-              messages = nil
-              selector.select.each do |mon|
-                self.messages += retrieve_lines
-              end
-              notify_actor.signal(:new_logs_lines) unless self.messages.empty?
-            end
-          end
-        end
-
-        # @return [Array<String>] current lines
-        def return_lines
-          msgs = messages.dup
-          messages.clear
-          msgs
+          raise NotImplementedError
         end
 
         # Write line to IO
