@@ -26,14 +26,13 @@ module Carnivore
 
           # Start the fetcher
           def start_fetcher
-            defer do
-              loop do
-                build_io
-                messages = nil
-                selector.select.each do |mon|
-                  self.messages += retrieve_lines
+            loop do
+              build_io
+              messages = nil
+              selector.select.each do |mon|
+                retrieve_lines.each do |l|
+                  self.messages << l
                 end
-                notify_actor.signal(:new_log_lines) unless self.messages.empty?
               end
             end
           end
@@ -57,19 +56,11 @@ module Carnivore
           #
           # @return [TrueClass]
           def build_io
-            unless(monitor)
-              if(::File.exists?(path))
-                unless(io)
-                  @io = ::File.open(path, 'r')
-                  @io.seek(0, ::IO::SEEK_END) # fast-forward to EOF
-                end
-                @monitor = selector.register(io, :r)
-              else
-                wait_for_file
-                build_io
-              end
+            result = super
+            if(result)
+              @monitor = selector.register(io, :r)
             end
-            true
+            result
           end
 
           # Destroy the IO instance and monitor
