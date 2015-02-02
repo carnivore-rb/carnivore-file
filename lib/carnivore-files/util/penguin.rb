@@ -24,23 +24,29 @@ module Carnivore
 
           # Start the fetcher
           def start_fetcher
-            defer do
-              loop do
-                build_io
-                notify.each do |event|
-                  event.events.each do |ev|
-                    case ev
-                    when :MODIFY
-                      self.messages += retrieve_lines
-                    when :MOVE_SELF, :DELETE_SELF, :ATTRIB
-                      destroy_io
+            loop do
+              build_io
+              notify.each do |event|
+                Celluloid::Future.new{ event.events }.value.each do |ev|
+                  case ev
+                  when :MODIFY
+                    retrieve_lines.each do |l|
+                      self.messages << l
                     end
+                  when :MOVE_SELF, :DELETE_SELF, :ATTRIB
+                    info "Destroying file IO due to FS modification! (#{ev.inspect})"
+                    destroy_io
+                    @waited = true
+                    break
+                  else
+                    debug "Received unhandled event: #{ev.inspect}"
                   end
-                  notify_actor.signal(:new_log_lines) unless messages.empty?
                 end
+                break unless io
               end
             end
           end
+
 
           private
 
@@ -52,7 +58,14 @@ module Carnivore
               if(::File.exists?(path))
                 notify_descriptors[:file_watch] = notify.add_watch(path, :ALL_EVENTS)
                 @io = ::File.open(path, 'r')
-                @io.seek(0, ::IO::SEEK_END) # fast-forward to EOF
+                unless(@waited)
+                  @io.seek(0, ::IO::SEEK_END) # fast-forward to EOF
+                else
+                  @waited = false
+                  retrieve_lines.each do |l|
+                    self.messages << l
+                  end
+                end
               else
                 wait_for_file
                 build_io
@@ -84,13 +97,12 @@ module Carnivore
               notify_descriptors[:file_wait] = notify.add_watch(directory, :OPEN)
               until(notified)
                 warn "Waiting for file to appear (#{path})"
-                event = notify.take
-                if(event.name)
-                  notified = ::File.expand_path(event.name) == path
-                end
+                event = Celluloid::Future.new{ notify.take }.value
+                notified = ::File.exists?(path)
               end
               notify.rm_watch(notify_descriptors.delete(:file_wait))
             end
+            @waited = true
             info "File has appeared (#{path})!"
           end
 
