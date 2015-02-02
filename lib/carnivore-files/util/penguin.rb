@@ -52,26 +52,13 @@ module Carnivore
 
           # Build the IO and monitor
           #
-          # @return [TrueClass]
+          # @return [TrueClass, FalseClass]
           def build_io
-            unless(io)
-              if(::File.exists?(path))
-                notify_descriptors[:file_watch] = notify.add_watch(path, :ALL_EVENTS)
-                @io = ::File.open(path, 'r')
-                unless(@waited)
-                  @io.seek(0, ::IO::SEEK_END) # fast-forward to EOF
-                else
-                  @waited = false
-                  retrieve_lines.each do |l|
-                    self.messages << l
-                  end
-                end
-              else
-                wait_for_file
-                build_io
-              end
+            result = super
+            if(result)
+              notify_descriptors[:file_watch] = notify.add_watch(path, :ALL_EVENTS)
             end
-            true
+            result
           end
 
           # Destroy the IO and monitor
