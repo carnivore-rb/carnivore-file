@@ -10,7 +10,7 @@ describe 'Carnivore::Source::File' do
       :type => :carn_file,
       :args => {
         :path => @file_path,
-        :foundation => :nio
+        :foundation => :poll
       }
     ).add_callback(:store) do |message|
       MessageStore.messages.push(message[:message][:content])
