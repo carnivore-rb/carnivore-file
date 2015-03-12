@@ -7,7 +7,7 @@ module Carnivore
       # Fetch lines from file
       class Fetcher
 
-        autoload :Nio, 'carnivore-files/util/nio'
+        autoload :Poll, 'carnivore-files/util/poll'
         autoload :Penguin, 'carnivore-files/util/penguin'
 
         include Celluloid
