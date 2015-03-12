@@ -12,6 +12,5 @@ spec = Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.add_dependency 'carnivore', '>= 0.1.8'
   s.add_dependency 'sleepy_penguin'
-  s.add_dependency 'nio4r'
   s.files = Dir['{lib}/**/**/*'] + %w(carnivore-files.gemspec README.md CHANGELOG.md)
 end
