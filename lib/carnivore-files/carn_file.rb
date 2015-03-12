@@ -22,7 +22,7 @@ module Carnivore
       def setup(*_)
         @path = ::File.expand_path(args[:path])
         unless(args[:foundation])
-          args[:foundation] = RUBY_PLATFORM == 'java' ? :nio4r : :penguin
+          args[:foundation] = RUBY_PLATFORM == 'java' ? :poll : :penguin
         end
       end
 
@@ -30,8 +30,8 @@ module Carnivore
       def connect
         @fetcher_name = "log_fetcher_#{name}".to_sym
         case args[:foundation].to_sym
-        when :nio, :nio4r
-          @fetcher = Carnivore::Files::Util::Fetcher::Nio.new(args)
+        when :poll
+          @fetcher = Carnivore::Files::Util::Fetcher::Poll.new(args)
         else
           @fetcher = Carnivore::Files::Util::Fetcher::Penguin.new(args)
         end
