@@ -56,9 +56,13 @@ module Carnivore
         # Retreive lines from file
         def retrieve_lines
           if(io)
+            io.pos = @history_pos if @history_pos
+            data = io.read(4096)
             while(data = io.read(4096))
               @leftover << data
+              data = io.read(4096)
             end
+            @history_pos = io.pos
             result = @leftover.split(delimiter)
             @leftover.replace @leftover.end_with?(delimiter) ? '' : result.pop.to_s
             result
