@@ -1,3 +1,6 @@
+# v0.3.2
+* Reset position prior to read
+
 # v0.3.0
 * Remove nio based fetcher implementation
 * Add polling based fetcher implementation
