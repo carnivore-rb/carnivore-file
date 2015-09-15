@@ -12,7 +12,7 @@ describe 'Carnivore::Source::File' do
         :path => @file_path
       }
     ).add_callback(:store) do |message|
-      MessageStore.messages.push(message[:message][:content])
+      MessageStore.messages.push(message[:message])
       message.confirm!
     end
     @runner = Thread.new{ Carnivore.start! }
@@ -23,6 +23,7 @@ describe 'Carnivore::Source::File' do
     if(File.exists?(@file_path))
       File.delete(@file_path)
     end
+    Carnivore::Supervisor.terminate!
     @runner.terminate
     Carnivore::Source.clear!
   end
@@ -60,7 +61,7 @@ describe 'Carnivore::Source::File' do
       File.open(@file_path, 'w+') do |file|
         file.puts 'ack'
       end
-      source_wait(6) do
+      source_wait(2) do
         !MessageStore.messages.empty?
       end
       MessageStore.messages.wont_be_empty

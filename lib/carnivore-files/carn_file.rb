@@ -9,18 +9,17 @@ module Carnivore
       attr_reader :path
       # @return [Symbol] registry name of fetcher
       attr_reader :fetcher
-
-      trap_exit :fetcher_failure
-      finalizer :fetcher_destroyer
+      # @return [Queue] queue to hold messages
+      attr_reader :message_queue
 
       # Setup source
       #
       # @param args [Hash]
       # @option args [String] :path path to file
       # @option args [Symbol] :foundation underlying file interaction library
-      # @option args [Celluloid::Actor] :notify_actor actor to notify on line receive
       def setup(*_)
         @path = ::File.expand_path(args[:path])
+        @message_queue = Queue.new
         unless(args[:foundation])
           args[:foundation] = RUBY_PLATFORM == 'java' ? :poll : :penguin
         end
@@ -28,37 +27,18 @@ module Carnivore
 
       # Start the line fetcher
       def connect
-        @fetcher_name = "log_fetcher_#{name}".to_sym
         case args[:foundation].to_sym
         when :poll
-          @fetcher = Carnivore::Files::Util::Fetcher::Poll.new(args)
+          @fetcher = Carnivore::Files::Util::Fetcher::Poll.new(args.merge(:queue => message_queue))
         else
-          @fetcher = Carnivore::Files::Util::Fetcher::Penguin.new(args)
+          @fetcher = Carnivore::Files::Util::Fetcher::Penguin.new(args.merge(:queue => message_queue))
         end
-        self.link fetcher
         fetcher.async.start_fetcher
       end
 
-      # Restart file collector if unexpectedly failed
-      #
-      # @param object [Actor] crashed actor
-      # @param reason [Exception, NilClass]
-      def fetcher_failure(object, reason)
-        if(reason && object == fetcher)
-          error "File message collector unexpectedly failed: #{reason} (restarting)"
-          connect
-        end
-      end
-
-      def fetcher_destroyer
-        if(fetcher && fetcher.alive?)
-          fetcher.terminate
-        end
-      end
-
       # @return [Array<Hash>] return messages
-      def receive(*args)
-        format_message(Celluloid::Future.new{ fetcher.messages.pop }.value)
+      def receive(*_)
+        defer{ message_queue.pop }
       end
 
       # Send payload

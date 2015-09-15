@@ -5,7 +5,6 @@ module Carnivore
     module Util
       class Fetcher
 
-
         # NIO based fetcher
         class Penguin < Fetcher
           # @return [SP::Inotify]
@@ -27,7 +26,7 @@ module Carnivore
             loop do
               build_io
               notify.each do |event|
-                Celluloid::Future.new{ event.events }.value.each do |ev|
+                defer{ event.events }.each do |ev|
                   case ev
                   when :MODIFY
                     retrieve_lines.each do |l|
@@ -46,7 +45,6 @@ module Carnivore
               end
             end
           end
-
 
           private
 
@@ -84,7 +82,7 @@ module Carnivore
               notify_descriptors[:file_wait] = notify.add_watch(directory, :OPEN)
               until(notified)
                 warn "Waiting for file to appear (#{path})"
-                event = Celluloid::Future.new{ notify.take }.value
+                event = defer{ notify.take }
                 notified = ::File.exists?(path)
               end
               notify.rm_watch(notify_descriptors.delete(:file_wait))

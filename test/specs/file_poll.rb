@@ -13,7 +13,7 @@ describe 'Carnivore::Source::File' do
         :foundation => :poll
       }
     ).add_callback(:store) do |message|
-      MessageStore.messages.push(message[:message][:content])
+      MessageStore.messages.push(message[:message])
       message.confirm!
     end
     @runner = Thread.new{ Carnivore.start! }

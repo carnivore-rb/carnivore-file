@@ -10,7 +10,8 @@ module Carnivore
         autoload :Poll, 'carnivore-files/util/poll'
         autoload :Penguin, 'carnivore-files/util/penguin'
 
-        include Celluloid
+        include Zoidberg::SoftShell
+        include Zoidberg::Supervise
         include Carnivore::Utils::Logging
 
         # @return [String] path to file
@@ -28,12 +29,11 @@ module Carnivore
         # @param args [Hash] initialization args
         # @option args [String] :path path to file
         # @option args [String] :delimiter string delimiter to break messages
-        # @option args [Celluloid::Actor] :notify_actor actor to be notified on new messages
         def initialize(args={})
           @leftover = ''
           @path = ::File.expand_path(args[:path])
           @delimiter = args.fetch(:delimiter, "\n")
-          @messages = Queue.new
+          @messages = args.fetch(:queue, Queue.new)
         end
 
         # Start the line fetcher
@@ -57,10 +57,9 @@ module Carnivore
         def retrieve_lines
           if(io)
             io.pos = @history_pos if @history_pos
-            data = io.read(4096)
+            @leftover << io.read(4096).to_s
             while(data = io.read(4096))
-              @leftover << data
-              data = io.read(4096)
+              @leftover << data.to_s
             end
             @history_pos = io.pos
             result = @leftover.split(delimiter)
@@ -77,6 +76,7 @@ module Carnivore
         def build_io
           unless(io)
             if(::File.exists?(path))
+              @history_pos = 0
               @io = ::File.open(path, 'r')
               unless(@waited)
                 @io.seek(0, ::IO::SEEK_END) # fast-forward to EOF
