@@ -1,3 +1,7 @@
+# v0.5.0
+* Update to latest carnivore
+* Refactor implementations
+
 # v0.3.2
 * Reset position prior to read
 

@@ -10,8 +10,8 @@ spec = Gem::Specification.new do |s|
   s.description = 'Carnivore file source'
   s.license = 'Apache 2.0'
   s.require_path = 'lib'
-  s.add_runtime_dependency 'carnivore', '>= 0.1.8'
-  s.add_runtime_dependency 'sleepy_penguin'
+  s.add_runtime_dependency 'carnivore', '>= 1.0.0', '< 2.0.0'
+  s.add_runtime_dependency 'sleepy_penguin', '~> 3.4'
   s.add_development_dependency 'pry'
   s.files = Dir['{lib}/**/**/*'] + %w(carnivore-files.gemspec README.md CHANGELOG.md)
 end
